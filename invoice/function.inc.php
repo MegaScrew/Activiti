@@ -1,6 +1,6 @@
 <?php 
 require_once 'crest.php';
-require_once '../../utils/phpqrcode/qrlib.php';
+require_once '../../../utils/phpqrcode/qrlib.php';
 
 /**
 *  Returns the date in ISO8601 format
@@ -38,7 +38,7 @@ function getQRCode(string $id_company, string $rq_company_name, string $rq_acc_n
 	$strQRCode = 'ST00012|Name='.$rq_company_name.'|PersonalAcc='.$rq_acc_num.'|BankName='.$rq_bank_name.'|BIC='.$rq_bik.'|CorrespAcc='.$rq_cor_acc_num.'|PayeeINN='.$rq_inn.'|KPP=|persAcc='.$inner.'|LASTNAME=|payerAddress='.$city.'|Purpose='.$inner.' ('.$outer.') '.$title.'|Sum='.$sum.'00';
 	
 	//html PNG location prefix путь где находится директория для размещения готового QR code
-	$PNG_WEB_DIR = '../../temp/';
+	$PNG_WEB_DIR = '../../../temp/';
 	//формирование имени файла с QR code
 	//$filename = 'qrcode'.'-'.$company_data['result']['TITLE'].'-'.date("d-m-Y").'.png';
 	$filename = 'qrcode'.'-'.$id_company.'-'.date("d-m-Y").'.png'; //тут экранированное имя файла
