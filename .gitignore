@@ -1,2 +1,5 @@
 settings.php
 ftpsync.settings
+logs/
+logs/**
+settings.json
