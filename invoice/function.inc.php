@@ -127,7 +127,7 @@ class invoice{
 			$this->id_mycompany = $result['find_deal']['UF_CRM_1631861994'];
 			$this->id_requisite = $result['get_my_company_requisite']['0']['ID'];
 			$this->id_bankdetail = $result['get_my_company_requisite_bankdetail']['0']['ID'];
-			$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' счёт за период '. $result['get_company']['UF_CRM_1619766058'];
+			$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' счёт за период '. $result['get_company']['UF_CRM_1619766058'].' за '.$result['get_company']['UF_CRM_1614603075'] .' кг.';
 			$this->date_pay_before = dateISO($day);
 			$this->user_description = 'Отгрузка в период '. $result['get_company']['UF_CRM_1619766058'] .' на общий вес: '. $result['get_company']['UF_CRM_1614603075'] .' кг.';
 			$this->quantity = $result['get_company']['UF_CRM_1614603075'];
