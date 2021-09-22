@@ -34,7 +34,7 @@ class invoice_close{
 	private $invoice_order_topic;
 	private $invoice_price;
 	
-	public function __construct(string $id_deal = 0){
+	public function __construct(string $id_deal = '0'){
 		$arData = [
 			'find_deal' => [
 				'method' => 'crm.deal.get',
@@ -64,7 +64,7 @@ class invoice_close{
 			$this->id_deal = $id_deal;
 			$this->id_company = $result['find_deal']['COMPANY_ID'];
 			$this->id_contact = $result['find_deal']['CONTACT_ID'];
-			$this->price = $result['find_deal']['OPPORTUNITY']
+			$this->price = $result['find_deal']['OPPORTUNITY'];
 			$this->inner = $result['get_company']['UF_CRM_1594794891'];
 			$this->outer = $result['get_company']['UF_CRM_1579359748326'];
 			$this->title = $result['get_company']['TITLE'];
