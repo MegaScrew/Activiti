@@ -69,7 +69,7 @@ class invoice_close{
 			$this->outer = $result['get_company']['UF_CRM_1579359748326'];
 			$this->title = $result['get_company']['TITLE'];
 			$this->city = $result['get_company']['UF_CRM_1579359732798'];
-			$this->invoice_id = $result['get_invoice']['ID'];
+			$this->invoice_id = $result['get_invoice']['0']['ID'];
 			$this->invoice_account_number = $result['get_invoice']['ACCOUNT_NUMBER'];
 			$this->invoice_order_topic = $result['get_invoice']['ORDER_TOPIC'];
 			$this->invoice_price = $result['get_invoice']['PRICE'];
