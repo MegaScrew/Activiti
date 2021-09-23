@@ -7,6 +7,8 @@ header('Content-Type: text/html; charset=UTF-8');
 
 require_once 'function.inc.php';
 
+$result = CRest::installApp();
+
 // $str = 'Start' ;
 
 //     $params = Array(
@@ -26,8 +28,11 @@ if (!empty($_REQUEST['workflow_id'])) {
 	$auth = $_REQUEST['auth'];
 	$id_deal = $_REQUEST['properties']['Deal'];
 	$day = $_REQUEST['properties']['Day'];
-
-	$my_invoice = new invoice($day, $id_deal);
+	$comment = $_REQUEST['properties']['Comment'];
+	$next_month = $_REQUEST['properties']['NextMonth'];
+	$full_month = $_REQUEST['properties']['FullMonth'];
+	
+	$my_invoice = new invoice($day, $id_deal, $comment, $next_month, $full_month);
 
 	$arData = [
 		'add_invoice' => [
@@ -49,11 +54,11 @@ if (!empty($_REQUEST['workflow_id'])) {
 			        'RESPONSIBLE_ID' => $my_invoice->getIdResponsible(),
 			            'PRODUCT_ROWS' => [
 			                '0' => [
-				                'PRODUCT_ID' => 209260,
+				                'PRODUCT_ID' => $my_invoice->getProduct(),
 				                'QUANTITY' => $my_invoice->getQuantity(),
 				                'PRICE' => $my_invoice->getPrice(),
-				                'MEASURE_CODE' => '166',       
-				                'MEASURE_NAME' => 'кг',
+				                'MEASURE_CODE' => $my_invoice->getMeasureCode(),       
+				                'MEASURE_NAME' => $my_invoice->getMeasureName(),
 				                'PRODUCT_NAME' => 'Пищевые отходы 5 класса опасности'
 			                ]
 	                	]
@@ -85,7 +90,7 @@ if (!empty($_REQUEST['workflow_id'])) {
     } 
 }
 
-$result = CRest::installApp();
+
 if($result['rest_only'] === false):?>
 
 <!DOCTYPE html>
@@ -142,6 +147,29 @@ if($result['rest_only'] === false):?>
 						'Type':'integer',
 						'Required':'Y',
 						'Multiple':'N',
+					},
+					'Comment':{
+						'Name': 'Комментарий',
+						'DESCRIPTION': 'Укажите дополнительный комментарий для QR кода',
+						'Type':'string',
+						'Required':'N',
+						'Multiple':'N',
+					},
+					'NextMonth':{
+						'Name': 'Следующий месяц',
+						'DESCRIPTION': 'Если необходимо формировать счет на следующий месяц по первичной сделке',
+						'Type':'bool',
+						'Required':'Y',
+						'Multiple':'N',
+						'Default':'N'
+					},
+					'FullMonth':{
+						'Name': 'Полный месяц',
+						'DESCRIPTION': 'Если необходимо формировать счет на полный месяц по первичной сделке',
+						'Type':'bool',
+						'Required':'Y',
+						'Multiple':'N',
+						'Default':'N'
 					},
 				},
 				'RETURN_PROPERTIES':{ //данные, которые активити будет возвращать бизнес-процессу
