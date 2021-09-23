@@ -17,6 +17,31 @@ function dateISO(int $day = 0){
 }
 
 /**
+*
+*
+*
+*/
+function nextMonth(){
+	$arr = [
+  		'Январь',
+  		'Февраль',
+  		'Март',
+  		'Апрель',
+  		'Май',
+  		'Июнь',
+  		'Июль',
+  		'Август',
+  		'Сентябрь',
+  		'Октябрь',
+  		'Ноябрь',
+  		'Декабрь'
+	];
+	$next_month = date("m")+1 > 12 ? 1 : date("m")+1;
+	$post_next_month = $next_month+1 > 12 ? 1 : $next_month+1;
+	return $arr[$next_month-1];
+}
+
+/**
 * The function returns the generated qr code
 * @var $id_company - id company
 * @var $rq_company_name - name my company
@@ -29,13 +54,14 @@ function dateISO(int $day = 0){
 * @var $outer - outer number
 * @var $title - title company
 * @var $city - city company
+* @var $comment - comment
 * @var $sum - sum invoice
 * @return array[file name, png file in base64_encode format]
 */
-function getQRCode(string $id_company, string $rq_company_name, string $rq_acc_num, string $rq_bank_name, string $rq_bik, string $rq_cor_acc_num, string $rq_inn, string $inner, string $outer, string $title, string $city, string $sum) {
+function getQRCode(string $id_company, string $rq_company_name, string $rq_acc_num, string $rq_bank_name, string $rq_bik, string $rq_cor_acc_num, string $rq_inn, string $inner, string $outer, string $title, string $city, string $user_description, string $comment = '', string $sum) {
 	
 	//формируем строку для генерирования QR code в которую подставляем название магазина, номер магазина и сумму к оплате 
-	$strQRCode = 'ST00012|Name='.$rq_company_name.'|PersonalAcc='.$rq_acc_num.'|BankName='.$rq_bank_name.'|BIC='.$rq_bik.'|CorrespAcc='.$rq_cor_acc_num.'|PayeeINN='.$rq_inn.'|KPP=|persAcc='.$inner.'|LASTNAME=|payerAddress='.$city.'|Purpose='.$inner.' ('.$outer.') '.$title.'|Sum='.$sum.'00';
+	$strQRCode = 'ST00012|Name='.$rq_company_name.'|PersonalAcc='.$rq_acc_num.'|BankName='.$rq_bank_name.'|BIC='.$rq_bik.'|CorrespAcc='.$rq_cor_acc_num.'|PayeeINN='.$rq_inn.'|KPP=|persAcc='.$inner.'|LASTNAME=|payerAddress='.$city.'|Purpose='.$inner.' ('.$outer.') '.$title.' '.$user_description.' '.$comment.'|Sum='.$sum.'00';
 	
 	//html PNG location prefix путь где находится директория для размещения готового QR code
 	$PNG_WEB_DIR = '../../../temp/';
@@ -70,6 +96,9 @@ class invoice{
 	private $user_description;
 	private $quantity;
 	private $price;
+	private $id_product;
+	private $measure_name;
+	private $measure_code;
 	private $sum;
 	private $inner;
 	private $outer;
@@ -85,15 +114,15 @@ class invoice{
 	private $rq_cor_acc_num;
 	private $qrcode;
 	
-	public function __construct(int $day = 0, string $id){
+	public function __construct(int $day = 0, string $id, string $comment = ''){
 		$arData = [
 			'find_deal' => [
 				'method' => 'crm.deal.get',
-				'params' => [ 'ID' => $id, 'select' => ['ID', 'COMPANY_ID', 'CONTACT_ID', 'ASSIGNED_BY_ID', 'UF_CRM_1631861994']]
+				'params' => [ 'ID' => $id, 'select' => ['ID', 'COMPANY_ID', 'CONTACT_ID', 'ASSIGNED_BY_ID', 'UF_CRM_1631861994', 'CATEGORY_ID', 'OPPORTUNITY', 'UF_CRM_1611652104', 'UF_CRM_1599118415']]
 			],
 			'get_company' => [
 				'method' => 'crm.company.get',
-				'params' => [ 'ID' => '$result[find_deal][COMPANY_ID]', 'select' => ['ID', 'TITLE', 'UF_CRM_1613731949', 'UF_CRM_1614603075', 'UF_CRM_1619766058', 'UF_CRM_1594794891', 'UF_CRM_1579359732798', 'UF_CRM_1579359748326']]
+				'params' => [ 'ID' => '$result[find_deal][COMPANY_ID]', 'select' => ['ID', 'TITLE', 'REVENUE', 'UF_CRM_1613731949', 'UF_CRM_1614603075', 'UF_CRM_1619766058', 'UF_CRM_1594794891', 'UF_CRM_1579359732798', 'UF_CRM_1579359748326']]
 			],
 			'get_my_company' => [
 				'method' => 'crm.company.get',
@@ -126,13 +155,66 @@ class invoice{
 			$this->id_responsible = $result['find_deal']['ASSIGNED_BY_ID'];
 			$this->id_mycompany = $result['find_deal']['UF_CRM_1631861994'];
 			$this->id_requisite = $result['get_my_company_requisite']['0']['ID'];
-			$this->id_bankdetail = $result['get_my_company_requisite_bankdetail']['0']['ID'];
-			$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' счёт за период '. $result['get_company']['UF_CRM_1619766058'].' за '.$result['get_company']['UF_CRM_1614603075'] .' кг.';
+			$this->id_bankdetail = $result['get_my_company_requisite_bankdetail']['0']['ID'];			
 			$this->date_pay_before = dateISO($day);
-			$this->user_description = 'Отгрузка в период '. $result['get_company']['UF_CRM_1619766058'] .' на общий вес: '. $result['get_company']['UF_CRM_1614603075'] .' кг.';
-			$this->quantity = $result['get_company']['UF_CRM_1614603075'];
-			$this->price = $result['get_company']['UF_CRM_1613731949'];
-			$this->sum = $this->quantity * $this->price;
+
+			switch ($result['find_deal']['CATEGORY_ID']) {
+				case '0':
+					$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Первая отгрузка '. date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104']));
+					$this->user_description = 'Первая отгрузка '.date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104']));
+					$this->quantity = 1;
+					$this->price = $result['find_deal']['OPPORTUNITY'];
+					$this->sum = $result['find_deal']['OPPORTUNITY'];
+					$this->measure_name = 'мес.';
+					$this->measure_code = 999;	
+					$this->id_product = 374176;					
+					break;
+				case '2':
+					$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Ежемесячный платеж за '.nextMonth();
+					$this->user_description = 'Ежемесячный платеж за '.nextMonth();
+					$this->quantity = 1;
+					$this->price = $result['get_company']['REVENUE'];
+					$this->sum = $result['get_company']['REVENUE'];
+					$this->measure_name = 'мес.';
+					$this->measure_code = 999;
+					$this->id_product = 374176;	
+					break;
+				case '12':
+					$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' счёт за период '. $result['get_company']['UF_CRM_1619766058'].' за '.$result['get_company']['UF_CRM_1614603075'] .' кг.';
+					$this->user_description = 'Отгрузка в период '. $result['get_company']['UF_CRM_1619766058'] .' на общий вес: '. $result['get_company']['UF_CRM_1614603075'] .' кг.';
+					$this->quantity = $result['get_company']['UF_CRM_1614603075'];
+					$this->price = $result['get_company']['UF_CRM_1613731949'];
+					$this->sum = $this->quantity * $this->price;
+					$this->measure_name = 'кг';
+					$this->measure_code = 166;
+					$this->id_product = 209260;	
+					break;
+				case '10':
+					$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .'Отгрузка по складу за '.date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104'])).' - '.$result['find_deal']['UF_CRM_1599118415'].' кг.';
+					$this->user_description = 'Отгрузка по складу за '.date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104'])).' - '.$result['find_deal']['UF_CRM_1599118415'].' кг.';					
+					$this->quantity = $result['get_company']['UF_CRM_1614603075'];
+					$this->price = $result['get_company']['UF_CRM_1613731949'];
+					$this->sum = $result['find_deal']['OPPORTUNITY'];
+					$this->measure_name = 'кг';
+					$this->measure_code = 166;
+					$this->id_product = 209260;	
+					break;
+				default:
+					$this->order_topic = $result['get_company']['UF_CRM_1594794891'];
+					$this->user_description = ' ';					
+					$this->quantity = $result['get_company']['UF_CRM_1614603075'];
+					$this->price = $result['get_company']['UF_CRM_1613731949'];
+					$this->sum = $result['find_deal']['OPPORTUNITY'];
+					$this->measure_name = 'мес.';
+					$this->measure_code = 999;
+					$this->id_product = 374176;	
+					break;
+			}
+			// $this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' счёт за период '. $result['get_company']['UF_CRM_1619766058'].' за '.$result['get_company']['UF_CRM_1614603075'] .' кг.';
+			// $this->user_description = 'Отгрузка в период '. $result['get_company']['UF_CRM_1619766058'] .' на общий вес: '. $result['get_company']['UF_CRM_1614603075'] .' кг.';
+			// $this->sum = $this->quantity * $this->price;
+			// $this->quantity = $result['get_company']['UF_CRM_1614603075'];
+			// $this->price = $result['get_company']['UF_CRM_1613731949'];			
 			$this->inner = $result['get_company']['UF_CRM_1594794891'];
 			$this->outer = $result['get_company']['UF_CRM_1579359748326'];
 			$this->title = $result['get_company']['TITLE'];
@@ -145,7 +227,7 @@ class invoice{
 			$this->rq_bik = $result['get_my_company_requisite_bankdetail']['0']['RQ_BIK'];
 			$this->rq_acc_num = $result['get_my_company_requisite_bankdetail']['0']['RQ_ACC_NUM'];
 			$this->rq_cor_acc_num = $result['get_my_company_requisite_bankdetail']['0']['RQ_COR_ACC_NUM'];
-			$this->qrcode = getQRCode($this->getIdCompany(), $this->getRqCompanyName(), $this->getRqAccNum(), $this->getRqBankName(), $this->getRqBik(), $this->getRqCorAccNum(), $this->getRqInn(), $this->getInner(), $this->getOuter(), $this->getTitle(), $this->getCity(), $this->getSum());
+			$this->qrcode = getQRCode($this->getIdCompany(), $this->getRqCompanyName(), $this->getRqAccNum(), $this->getRqBankName(), $this->getRqBik(), $this->getRqCorAccNum(), $this->getRqInn(), $this->getInner(), $this->getOuter(), $this->getTitle(), $this->getCity(), $this->getUserDescription(), $comment, $this->getSum());
 			// echo '<pre>';
 			// 	print_r($result);
 			// echo '</pre>';
@@ -238,6 +320,18 @@ class invoice{
 
 	public function getIdResponsible(){
 		return $this->id_responsible;
+	}
+
+	public function getMeasureName(){
+		return $this->measure_name;
+	}
+
+	public function getProduct(){
+		return $this->id_product;
+	}
+
+	public function getMeasureCode(){
+		return $this->measure_code;
 	}
 }
 
