@@ -7,6 +7,8 @@ header('Content-Type: text/html; charset=UTF-8');
 
 require_once 'function.inc.php';
 
+$result = CRest::installApp();
+
 // $str = 'Start' ;
 
 //     $params = Array(
@@ -26,8 +28,9 @@ if (!empty($_REQUEST['workflow_id'])) {
 	$auth = $_REQUEST['auth'];
 	$id_deal = $_REQUEST['properties']['Deal'];
 	$day = $_REQUEST['properties']['Day'];
-
-	$my_invoice = new invoice($day, $id_deal);
+	$comment = $_REQUEST['properties']['Comment'];
+	
+	$my_invoice = new invoice($day, $id_deal, $comment);
 
 	$arData = [
 		'add_invoice' => [
@@ -49,11 +52,11 @@ if (!empty($_REQUEST['workflow_id'])) {
 			        'RESPONSIBLE_ID' => $my_invoice->getIdResponsible(),
 			            'PRODUCT_ROWS' => [
 			                '0' => [
-				                'PRODUCT_ID' => 209260,
+				                'PRODUCT_ID' => $my_invoice->getProduct(),
 				                'QUANTITY' => $my_invoice->getQuantity(),
 				                'PRICE' => $my_invoice->getPrice(),
-				                'MEASURE_CODE' => '166',       
-				                'MEASURE_NAME' => 'кг',
+				                'MEASURE_CODE' => $my_invoice->getMeasureCode(),       
+				                'MEASURE_NAME' => $my_invoice->getMeasureName(),
 				                'PRODUCT_NAME' => 'Пищевые отходы 5 класса опасности'
 			                ]
 	                	]
@@ -85,7 +88,7 @@ if (!empty($_REQUEST['workflow_id'])) {
     } 
 }
 
-$result = CRest::installApp();
+
 if($result['rest_only'] === false):?>
 
 <!DOCTYPE html>
@@ -141,6 +144,13 @@ if($result['rest_only'] === false):?>
 						'DESCRIPTION': 'Укажите сколько дней дается на оплату (1, 2, 3...99)',
 						'Type':'integer',
 						'Required':'Y',
+						'Multiple':'N',
+					},
+					'Comment':{
+						'Name': 'Комментарий',
+						'DESCRIPTION': 'Укажите дополнительный комментарий для QR кода',
+						'Type':'string',
+						'Required':'N',
 						'Multiple':'N',
 					},
 				},
