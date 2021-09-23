@@ -29,8 +29,10 @@ if (!empty($_REQUEST['workflow_id'])) {
 	$id_deal = $_REQUEST['properties']['Deal'];
 	$day = $_REQUEST['properties']['Day'];
 	$comment = $_REQUEST['properties']['Comment'];
+	$next_month = $_REQUEST['properties']['NextMonth'];
+	$full_month = $_REQUEST['properties']['FullMonth'];
 	
-	$my_invoice = new invoice($day, $id_deal, $comment);
+	$my_invoice = new invoice($day, $id_deal, $comment, $next_month, $full_month);
 
 	$arData = [
 		'add_invoice' => [
@@ -152,6 +154,22 @@ if($result['rest_only'] === false):?>
 						'Type':'string',
 						'Required':'N',
 						'Multiple':'N',
+					},
+					'NextMonth':{
+						'Name': 'Следующий месяц',
+						'DESCRIPTION': 'Если необходимо формировать счет на следующий месяц по первичной сделке',
+						'Type':'bool',
+						'Required':'Y',
+						'Multiple':'N',
+						'Default':'N'
+					},
+					'FullMonth':{
+						'Name': 'Полный месяц',
+						'DESCRIPTION': 'Если необходимо формировать счет на полный месяц по первичной сделке',
+						'Type':'bool',
+						'Required':'Y',
+						'Multiple':'N',
+						'Default':'N'
 					},
 				},
 				'RETURN_PROPERTIES':{ //данные, которые активити будет возвращать бизнес-процессу
