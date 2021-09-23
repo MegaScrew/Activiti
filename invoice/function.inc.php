@@ -17,9 +17,7 @@ function dateISO(int $day = 0){
 }
 
 /**
-*
-*
-*
+* Returns the name of the month in Russian*
 */
 function nextMonth(){
 	$arr = [
@@ -114,7 +112,7 @@ class invoice{
 	private $rq_cor_acc_num;
 	private $qrcode;
 	
-	public function __construct(int $day = 0, string $id, string $comment = ''){
+	public function __construct(int $day = 0, string $id, string $comment = '', string $next_month = 'N', string $full_month = 'N'){
 		$arData = [
 			'find_deal' => [
 				'method' => 'crm.deal.get',
@@ -122,7 +120,7 @@ class invoice{
 			],
 			'get_company' => [
 				'method' => 'crm.company.get',
-				'params' => [ 'ID' => '$result[find_deal][COMPANY_ID]', 'select' => ['ID', 'TITLE', 'REVENUE', 'UF_CRM_1613731949', 'UF_CRM_1614603075', 'UF_CRM_1619766058', 'UF_CRM_1594794891', 'UF_CRM_1579359732798', 'UF_CRM_1579359748326']]
+				'params' => [ 'ID' => '$result[find_deal][COMPANY_ID]', 'select' => ['ID', 'TITLE', 'REVENUE', 'UF_CRM_1613731949', 'UF_CRM_1614603075', 'UF_CRM_1619766058', 'UF_CRM_1594794891', 'UF_CRM_1579359732798', 'UF_CRM_1579359748326', 'UF_CRM_1619173084']]
 			],
 			'get_my_company' => [
 				'method' => 'crm.company.get',
@@ -160,14 +158,44 @@ class invoice{
 
 			switch ($result['find_deal']['CATEGORY_ID']) {
 				case '0':
-					$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Первая отгрузка '. date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104']));
-					$this->user_description = 'Первая отгрузка '.date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104']));
-					$this->quantity = 1;
-					$this->price = $result['find_deal']['OPPORTUNITY'];
-					$this->sum = $result['find_deal']['OPPORTUNITY'];
-					$this->measure_name = 'мес.';
-					$this->measure_code = 999;	
-					$this->id_product = 374176;					
+					switch ($result['get_company']['UF_CRM_1619173084']) {
+						case '5956': // месяц
+							if ($next_month == 'N') {
+								if ($full_month == 'N') {
+									$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Первая отгрузка '. date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104']));
+									$this->user_description = 'Первая отгрузка '.date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104']));
+									$this->quantity = 1;
+									$this->price = $result['find_deal']['OPPORTUNITY'];
+									$this->sum = $result['find_deal']['OPPORTUNITY'];
+								} else {
+									$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Первая отгрузка '. date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104'])).' платеж за полный месяц ';
+									$this->user_description = 'Первая отгрузка '. date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104'])).' платеж за полный месяц ';
+									$this->quantity = 1;
+									$this->price = $result['get_company']['REVENUE'];
+									$this->sum = $result['get_company']['REVENUE'];
+								}		
+							} else {
+								$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Ежемесячный платеж за '.nextMonth();
+								$this->user_description = 'Ежемесячный платеж за '.nextMonth();
+								$this->quantity = 1;
+								$this->price = $result['get_company']['REVENUE'];
+								$this->sum = $result['get_company']['REVENUE'];
+							}
+							$this->measure_name = 'мес.';
+							$this->measure_code = 999;	
+							$this->id_product = 374176;
+							break;
+						case '5958': // кг.
+							$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Авансовый счет';
+							$this->user_description = $result['get_company']['UF_CRM_1594794891'] .' Авансовый счет';
+							$this->quantity = 1;
+							$this->price = $result['get_company']['REVENUE'];
+							$this->sum = $result['get_company']['REVENUE'];
+							$this->measure_name = 'кг';
+							$this->measure_code = 166;
+							$this->id_product = 209260;
+							break;	
+					}					
 					break;
 				case '2':
 					$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Ежемесячный платеж за '.nextMonth();
