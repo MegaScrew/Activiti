@@ -16,6 +16,32 @@ function dateISO(int $day = 0){
 }
 
 /**
+* SleepFloatSecs function
+*/
+function sleepFloatSecs(float $secs) {
+    $intSecs = intval($secs);
+    $microSecs = ($secs - $intSecs) * 1000000;
+
+    if($intSecs > 0) {
+      sleep($intSecs);
+    }
+    if($microSecs > 0) {
+      usleep($microSecs);
+    }
+}
+
+/**
+* Random timer
+* @var $min
+* @var $max
+* @return float var
+*/
+function randomFloat(int $min, int $max){
+	$var = random_int($min, $max);
+	return $var / 1000;
+}
+
+/**
 * Class invoice
 * @var $day - payment deadline in how many days
 * @var $id - id of the deals to make an invoice for
@@ -52,7 +78,7 @@ class invoice_close{
 
 		$result = CRest::callBatch($arData);
 		while($result['error']=="QUERY_LIMIT_EXCEEDED"){
-		    sleep(1);
+		    sleepFloatSecs(randomFloat(800, 3000));
 		    $result = CRest::callBatch($arData);
 		    if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
 		}
