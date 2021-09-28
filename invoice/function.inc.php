@@ -247,7 +247,7 @@ class invoice{
 				case '10':
 					$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Отгрузка по складу за '.date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104'])).' - '.$result['find_deal']['UF_CRM_1599118415'].' кг.';
 					$this->user_description = 'Отгрузка по складу за '.date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104'])).' - '.$result['find_deal']['UF_CRM_1599118415'].' кг.';					
-					$this->quantity = $result['get_company']['UF_CRM_1614603075'];
+					$this->quantity = $result['find_deal']['UF_CRM_1599118415'];
 					$this->price = $result['get_company']['UF_CRM_1613731949'];
 					$this->sum = $result['find_deal']['OPPORTUNITY'];
 					$this->measure_name = 'кг';
