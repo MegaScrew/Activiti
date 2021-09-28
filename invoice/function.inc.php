@@ -2,6 +2,33 @@
 require_once 'crest.php';
 require_once '../../../utils/phpqrcode/qrlib.php';
 
+
+/**
+* SleepFloatSecs function
+*/
+function sleepFloatSecs(float $secs) {
+    $intSecs = intval($secs);
+    $microSecs = ($secs - $intSecs) * 1000000;
+
+    if($intSecs > 0) {
+      sleep($intSecs);
+    }
+    if($microSecs > 0) {
+      usleep($microSecs);
+    }
+}
+
+/**
+* Random timer
+* @var $min
+* @var $max
+* @return float var
+*/
+function randomFloat(int $min, int $max){
+	$var = random_int($min, $max);
+	return $var / 1000;
+}
+
 /**
 *  Returns the date in ISO8601 format
 * @var $day integer, specifies how many days to add to the current date
@@ -138,7 +165,7 @@ class invoice{
 
 		$result = CRest::callBatch($arData);
 		while($result['error']=="QUERY_LIMIT_EXCEEDED"){
-		    sleep(1);
+		    sleepFloatSecs(randomFloat(800, 3000));
 		    $result = CRest::callBatch($arData);
 		    if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
 		}
@@ -218,7 +245,7 @@ class invoice{
 					$this->id_product = 209260;	
 					break;
 				case '10':
-					$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .'Отгрузка по складу за '.date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104'])).' - '.$result['find_deal']['UF_CRM_1599118415'].' кг.';
+					$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Отгрузка по складу за '.date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104'])).' - '.$result['find_deal']['UF_CRM_1599118415'].' кг.';
 					$this->user_description = 'Отгрузка по складу за '.date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104'])).' - '.$result['find_deal']['UF_CRM_1599118415'].' кг.';					
 					$this->quantity = $result['get_company']['UF_CRM_1614603075'];
 					$this->price = $result['get_company']['UF_CRM_1613731949'];
