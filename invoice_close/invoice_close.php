@@ -152,7 +152,7 @@ if($result['rest_only'] === false):?>
 
 	function uninstallActivity(){
 		var params={
-			'CODE':'create_invoice'
+			'CODE':'close_invoice'
 		}
 
 		BX24.callMethod(
