@@ -16,52 +16,46 @@ $result = CRest::installApp();
 //          // 'MESSAGE' => 'xxx');
 //     	'MESSAGE' => $str);
 
-//     $result = CRest::call('im.message.add', $str);
-
-if (!empty($_REQUEST['workflow_id'])) {
-	if (empty($_REQUEST['auth'])) {
-		die;
-	}
+//     $result = CRest::call('im.message.add', $params);
+// echo 'test';
+// if (!empty($_REQUEST['workflow_id'])) {
+// 	if (empty($_REQUEST['auth'])) {
+// 		die;
+// 	}
 
 	$event_token = $_REQUEST['event_token'];
 	
 	$auth = $_REQUEST['auth'];
 	$id_deal = $_REQUEST['properties']['Deal'];
+	$comment = $_REQUEST['properties']['Comment'];
+	// $id_deal = 166338;
+	// $comment =' ';
+	$my_QRcode = new myQRcode($id_deal, $comment);
 
-	$my_invoice = new invoice_close($id_deal);
+	$arData = [
+		'add_qrcode' => [
+			'method' => 'crm.deal.update',
+			'params' => [ 
+				'ID' => $my_QRcode->getIdDeal(),
+				'fields' => [
+					'UF_CRM_1593292405' => $my_QRcode->getQRcode(), //QRCode
+            	 	'UF_CRM_1596175156' => $my_QRcode->getQRcode2(), //QRCode 2
+	            ]
+	        ]
+		]
+	];
 
-	$invoiceId = 'счет не найден';
-	if ($my_invoice->getInvoiceID() != null) {
-		$invoiceId = $my_invoice->getInvoiceID();
-
-		$arData = [
-			'add_invoice' => [
-				'method' => 'crm.invoice.update',
-				'params' => [ 
-					'ID' => $invoiceId, 
-					'fields' => [
-				        'STATUS_ID' => 'P',
-				        'PAY_SYSTEM_ID' => 2,
-				        'PAY_VOUCHER_NUM' => 8888888888888,
-				        'PAY_VOUCHER_DATE' => dateISO(),
-				        'REASON_MARKED' => 'Закрыт автоматически при проведении оплаты бухгалтерией'
-		            ]
-		        ]
-			]
-		];
-
-		$result = CRest::callBatch($arData);
-		while($result['error']=="QUERY_LIMIT_EXCEEDED"){
-		    sleepFloatSecs(randomFloat(800, 3000));
-		    $result = CRest::callBatch($arData);
-		    if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
-		}
+	$result = CRest::callBatch($arData);
+	while($result['error']=="QUERY_LIMIT_EXCEEDED"){
+	    sleepFloatSecs(randomFloat(800, 3000));
+	    $result = CRest::callBatch($arData);
+	    if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
 	}
 
 	$params = [
         'EVENT_TOKEN'  => $event_token,
         'RETURN_VALUES'=> [
-			'INVOICE_NUMBER' => $invoiceId,
+			'RESULT_QRCODE' => $result['result']['result']['add_qrcode'],
 		],
 		'LOG_MESSAGE'=>'OK'	
     ];
@@ -72,8 +66,7 @@ if (!empty($_REQUEST['workflow_id'])) {
         $result = CRest::callBatch($arData);
         if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
     } 
-}
-
+// }
 
 
 if($result['rest_only'] === false):?>
@@ -103,7 +96,7 @@ if($result['rest_only'] === false):?>
 		<?php endif;?>
 <?php endif;?>
 
-	<h1>Закрытие счета</h1>
+	<h1>QR code</h1>
 	<button onclick="installActivity();">Добавить Активит</button>
 	<button onclick="uninstallActivity();">Удалить Активити</button>
 
@@ -112,12 +105,12 @@ if($result['rest_only'] === false):?>
 	function installActivity(){
 
 		var params={
-				'CODE':'close_invoice', //уникальный в рамках приложения код
+				'CODE':'create_qrcode', //уникальный в рамках приложения код
 				'HANDLER':'<?=BP_APP_HANDLER?>',
 				'AUTH_USER_ID':1644,
 				'USE_SUBSCRIPTION':'Y', //Y - если бизнесс-процесс должен ждать ответа приложения, N - если не должен ждать
-				'NAME':'Закрытие счета',
-				'DESCRIPTION':'Активи закрывает послседний не оплаченный счет по указанной сделке где совпадает Контакт и сумма указанные в счете и в сделке, БП будет стоять пока не придет ответ.',
+				'NAME':'QR Code',
+				'DESCRIPTION':'Активи формирует QR code, БП будет стоять пока не придет ответ.',
 				'PROPERTIES':{ //Входные данные для активити
 					'Deal':{
 						'Name': 'ID Сделки',
@@ -126,10 +119,17 @@ if($result['rest_only'] === false):?>
 						'Required':'Y',
 						'Multiple':'N',
 					},
+					'Comment':{
+						'Name': 'Комментарий',
+						'DESCRIPTION': 'Укажите дополнительный комментарий для QR кода',
+						'Type':'string',
+						'Required':'N',
+						'Multiple':'N',
+					},
 				},
 				'RETURN_PROPERTIES':{ //данные, которые активити будет возвращать бизнес-процессу
-					'INVOICE_NUMBER':{
-						'Name':'Invoice_Number',
+					'RESULT_QRCODE':{
+						'Name':'Resul_QRcode',
 						'Type':'string',
 						'Required':'N',
 						'Multiple':'N',
@@ -152,7 +152,7 @@ if($result['rest_only'] === false):?>
 
 	function uninstallActivity(){
 		var params={
-			'CODE':'close_invoice'
+			'CODE':'create_qrcode'
 		}
 
 		BX24.callMethod(
