@@ -52,7 +52,7 @@ if (!empty($_REQUEST['workflow_id'])) {
 
 		$result = CRest::callBatch($arData);
 		while($result['error']=="QUERY_LIMIT_EXCEEDED"){
-		    sleep(1);
+		    sleepFloatSecs(randomFloat(800, 3000));
 		    $result = CRest::callBatch($arData);
 		    if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
 		}
@@ -68,7 +68,7 @@ if (!empty($_REQUEST['workflow_id'])) {
 
     $result = CRest::call('bizproc.event.send', $params); 
     while($result['error']=="QUERY_LIMIT_EXCEEDED"){
-        sleep(1);
+        sleepFloatSecs(randomFloat(800, 3000));
         $result = CRest::callBatch($arData);
         if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
     } 
