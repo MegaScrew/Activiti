@@ -18,10 +18,10 @@ $result = CRest::installApp();
 
 //     $result = CRest::call('im.message.add', $params);
 // echo 'test';
-// if (!empty($_REQUEST['workflow_id'])) {
-// 	if (empty($_REQUEST['auth'])) {
-// 		die;
-// 	}
+if (!empty($_REQUEST['workflow_id'])) {
+	if (empty($_REQUEST['auth'])) {
+		die;
+	}
 
 	$event_token = $_REQUEST['event_token'];
 	
@@ -66,7 +66,7 @@ $result = CRest::installApp();
         $result = CRest::callBatch($arData);
         if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
     } 
-// }
+}
 
 
 if($result['rest_only'] === false):?>
