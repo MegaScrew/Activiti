@@ -86,7 +86,7 @@ function nextMonth(){
 function getQRCode(string $id_company, string $rq_company_name, string $rq_acc_num, string $rq_bank_name, string $rq_bik, string $rq_cor_acc_num, string $rq_inn, string $inner, string $outer, string $title, string $city, string $user_description, string $comment = '', string $sum) {
 	
 	//формируем строку для генерирования QR code в которую подставляем название магазина, номер магазина и сумму к оплате 
-	$strQRCode = 'ST00012|Name='.$rq_company_name.'|PersonalAcc='.$rq_acc_num.'|BankName='.$rq_bank_name.'|BIC='.$rq_bik.'|CorrespAcc='.$rq_cor_acc_num.'|PayeeINN='.$rq_inn.'|KPP=|persAcc='.$inner.'|LASTNAME=|payerAddress='.$city.'|Purpose='.$inner.' ('.$outer.') '.$title.' '.$user_description.' '.$comment.'|Sum='.$sum.'00';
+	$strQRCode = 'ST00012|Name='.$rq_company_name.'|PersonalAcc='.$rq_acc_num.'|BankName='.$rq_bank_name.'|BIC='.$rq_bik.'|CorrespAcc='.$rq_cor_acc_num.'|PayeeINN='.$rq_inn.'|KPP=|persAcc='.$inner.'|LASTNAME=|payerAddress='.$city.'|Purpose='.$inner.' ('.$outer.') '.$title.' '.$user_description.' '.$comment.'|Sum='.$sum*100;
 	
 	//html PNG location prefix путь где находится директория для размещения готового QR code
 	$PNG_WEB_DIR = '../../../temp/';
@@ -203,6 +203,15 @@ class myQRcode{
 							$this->qrcode = getQRCode($this->getIdCompany(), $this->getRqCompanyName(), $this->getRqAccNum(), $this->getRqBankName(), $this->getRqBik(), $this->getRqCorAccNum(), $this->getRqInn(), $this->getInner(), $this->getOuter(), $this->getTitle(), $this->getCity(), $this->getUserDescription(), $comment, $this->getSum());
 							$this->qrcode2 = getQRCode($this->getIdCompany(), $this->getRqCompanyName(), $this->getRqAccNum(), $this->getRqBankName(), $this->getRqBik(), $this->getRqCorAccNum(), $this->getRqInn(), $this->getInner(), $this->getOuter(), $this->getTitle(), $this->getCity(), $this->getUserDescription(), $comment, $this->getSum());
 							break;
+						default:
+							$this->user_description = 'Первая отгрузка '.date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104']));
+							$this->sum = $result['find_deal']['OPPORTUNITY'];
+							$this->qrcode = getQRCode($this->getIdCompany(), $this->getRqCompanyName(), $this->getRqAccNum(), $this->getRqBankName(), $this->getRqBik(), $this->getRqCorAccNum(), $this->getRqInn(), $this->getInner(), $this->getOuter(), $this->getTitle(), $this->getCity(), $this->getUserDescription(), $comment, $this->getSum());
+
+							$this->user_description = 'Первая отгрузка '. date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104'])).' платеж за полный месяц ';
+							$this->sum = $result['get_company']['REVENUE'];
+							$this->qrcode2 = getQRCode($this->getIdCompany(), $this->getRqCompanyName(), $this->getRqAccNum(), $this->getRqBankName(), $this->getRqBik(), $this->getRqCorAccNum(), $this->getRqInn(), $this->getInner(), $this->getOuter(), $this->getTitle(), $this->getCity(), $this->getUserDescription(), $comment, $this->getSum());
+						break;
 					}					
 					break;
 				case '2':

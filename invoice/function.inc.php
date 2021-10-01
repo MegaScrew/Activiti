@@ -86,7 +86,7 @@ function nextMonth(){
 function getQRCode(string $id_company, string $rq_company_name, string $rq_acc_num, string $rq_bank_name, string $rq_bik, string $rq_cor_acc_num, string $rq_inn, string $inner, string $outer, string $title, string $city, string $user_description, string $comment = '', string $sum) {
 	
 	//формируем строку для генерирования QR code в которую подставляем название магазина, номер магазина и сумму к оплате 
-	$strQRCode = 'ST00012|Name='.$rq_company_name.'|PersonalAcc='.$rq_acc_num.'|BankName='.$rq_bank_name.'|BIC='.$rq_bik.'|CorrespAcc='.$rq_cor_acc_num.'|PayeeINN='.$rq_inn.'|KPP=|persAcc='.$inner.'|LASTNAME=|payerAddress='.$city.'|Purpose='.$inner.' ('.$outer.') '.$title.' '.$user_description.' '.$comment.'|Sum='.$sum.'00';
+	$strQRCode = 'ST00012|Name='.$rq_company_name.'|PersonalAcc='.$rq_acc_num.'|BankName='.$rq_bank_name.'|BIC='.$rq_bik.'|CorrespAcc='.$rq_cor_acc_num.'|PayeeINN='.$rq_inn.'|KPP=|persAcc='.$inner.'|LASTNAME=|payerAddress='.$city.'|Purpose='.$inner.' ('.$outer.') '.$title.' '.$user_description.' '.$comment.'|Sum='.$sum*100;
 	
 	//html PNG location prefix путь где находится директория для размещения готового QR code
 	$PNG_WEB_DIR = '../../../temp/';
@@ -221,7 +221,33 @@ class invoice{
 							$this->measure_name = 'кг';
 							$this->measure_code = 166;
 							$this->id_product = 209260;
-							break;	
+							break;
+						default:
+							if ($next_month == 'N') {
+								if ($full_month == 'N') {
+									$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Первая отгрузка '. date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104']));
+									$this->user_description = 'Первая отгрузка '.date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104']));
+									$this->quantity = 1;
+									$this->price = $result['find_deal']['OPPORTUNITY'];
+									$this->sum = $result['find_deal']['OPPORTUNITY'];
+								} else {
+									$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Первая отгрузка '. date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104'])).' платеж за полный месяц ';
+									$this->user_description = 'Первая отгрузка '. date("d.m.Y", strtotime($result['find_deal']['UF_CRM_1611652104'])).' платеж за полный месяц ';
+									$this->quantity = 1;
+									$this->price = $result['get_company']['REVENUE'];
+									$this->sum = $result['get_company']['REVENUE'];
+								}		
+							} else {
+								$this->order_topic = $result['get_company']['UF_CRM_1594794891'] .' Ежемесячный платеж за '.nextMonth();
+								$this->user_description = 'Ежемесячный платеж за '.nextMonth();
+								$this->quantity = 1;
+								$this->price = $result['get_company']['REVENUE'];
+								$this->sum = $result['get_company']['REVENUE'];
+							}
+							$this->measure_name = 'мес.';
+							$this->measure_code = 999;	
+							$this->id_product = 374176;
+						break;	
 					}					
 					break;
 				case '2':
