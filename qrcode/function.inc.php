@@ -213,7 +213,7 @@ class myQRcode{
 					break;
 				case '12':
 					$this->user_description = 'Отгрузка в период '. $result['get_company']['UF_CRM_1619766058'] .' на общий вес: '. $result['get_company']['UF_CRM_1614603075'] .' кг.';
-					$this->sum = $this->quantity * $this->price;
+					$this->sum = $result['find_deal']['OPPORTUNITY'];
 					$this->qrcode = getQRCode($this->getIdCompany(), $this->getRqCompanyName(), $this->getRqAccNum(), $this->getRqBankName(), $this->getRqBik(), $this->getRqCorAccNum(), $this->getRqInn(), $this->getInner(), $this->getOuter(), $this->getTitle(), $this->getCity(), $this->getUserDescription(), $comment, $this->getSum());
 					$this->qrcode2 = getQRCode($this->getIdCompany(), $this->getRqCompanyName(), $this->getRqAccNum(), $this->getRqBankName(), $this->getRqBik(), $this->getRqCorAccNum(), $this->getRqInn(), $this->getInner(), $this->getOuter(), $this->getTitle(), $this->getCity(), $this->getUserDescription(), $comment, $this->getSum());
 					break;
